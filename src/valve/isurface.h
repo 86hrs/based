@@ -30,16 +30,16 @@ class ISurface
 public:
 	constexpr void DrawSetColor(int r, int g, int b, int a = 255) noexcept
 	{
-		memory::Call<void>(this, 15, r, g, b, a);
+		m::Call<void>(this, 15, r, g, b, a);
 	}
 
 	constexpr void DrawFilledRect(int x, int y, int xx, int yy) noexcept
 	{
-		memory::Call<void>(this, 16, x, y, xx, yy);
+		m::Call<void>(this, 16, x, y, xx, yy);
 	}
 
 	constexpr void DrawOutlinedRect(int x, int y, int xx, int yy) noexcept
 	{
-		memory::Call<void>(this, 18, x, y, xx, yy);
+		m::Call<void>(this, 18, x, y, xx, yy);
 	}
 };

@@ -6,6 +6,7 @@
 // access interfaces
 #include "../core/interfaces.h"
 
+// custom clamp function bc who uses std
 inline float fclamp(float value, float min, float max) {
   if (value < min) {
     return min;
@@ -15,6 +16,8 @@ inline float fclamp(float value, float min, float max) {
     return value;
   }
 }
+
+// custom remainder function bc who uses std
 inline float fremainder(float value, float period) {
   float result = std::fmodf(value, period);
   if (result < 0) {
@@ -23,42 +26,37 @@ inline float fremainder(float value, float period) {
   return result;
 }
 
-void hacks::RunBunnyHop(CUserCmd* cmd) noexcept {
-  if (!(globals::localPlayer->GetFlags() & CEntity::FL_ONGROUND))
+void f::RunBunnyHop(CUserCmd* cmd) noexcept {
+  if (!(g::localPlayer->GetFlags() & CEntity::FL_ONGROUND))
     cmd->buttons &= ~CUserCmd::IN_JUMP;
 }
 
-void hacks::RunRadar() noexcept {
-  for (int i = 1; i <= interfaces::globals->maxClients; ++i) {
-    CEntity* entity = interfaces::entityList->GetEntityFromIndex(i);
+void f::RunRadar() noexcept {
+  for (int i = 1; i <= i::globals->maxClients; ++i) {
+    CEntity* entity = i::entityList->GetEntityFromIndex(i);
     if (!entity) continue;
 
     if (entity->IsDormant() || !entity->IsAlive()) continue;
 
-    if (entity->GetTeam() == globals::localPlayer->GetTeam()) continue;
+    if (entity->GetTeam() == g::localPlayer->GetTeam()) continue;
 
     entity->Spotted() = true;
   }
 }
 
-void hacks::RunFov(int fov) noexcept {
+void f::IgnoreFlash(float alpha) noexcept {
   // local player check
-  if (!globals::localPlayer) return;
-  globals::localPlayer->DefaultFOV() = fov;
-}
-void hacks::IgnoreFlash(float alpha) noexcept {
-  // local player check
-  if (!globals::localPlayer) return;
-  globals::localPlayer->FlashAlpha() = alpha;
+  if (!g::localPlayer) return;
+  g::localPlayer->FlashAlpha() = alpha;
 }
 
 CVector oldPunch{0, 0, 0};
-void hacks::RecoilControl(CUserCmd* cmd) noexcept {
+void f::RecoilControl(CUserCmd* cmd) noexcept {
   // local player check
-  if (!globals::localPlayer) return;
+  if (!g::localPlayer) return;
   // check if we are trying to shoot
   if ((cmd->buttons & CUserCmd::IN_ATTACK)) {
-    CEntity* activeWeapon = globals::localPlayer->GetActiveWeapon();
+    CEntity* activeWeapon = g::localPlayer->GetActiveWeapon();
     if (!activeWeapon) return;
     const int weaponType = activeWeapon->GetWeaponType();
 
@@ -69,7 +67,7 @@ void hacks::RecoilControl(CUserCmd* cmd) noexcept {
       case CEntity::WEAPONTYPE_RIFLE:
       case CEntity::WEAPONTYPE_SUBMACHINEGUN:
       case CEntity::WEAPONTYPE_MACHINEGUN:
-        globals::localPlayer->GetAimPunch(aimPunch);
+        g::localPlayer->GetAimPunch(aimPunch);
         break;
       default:
         break;

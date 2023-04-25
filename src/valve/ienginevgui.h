@@ -17,6 +17,6 @@ class IEngineVGui
 public:
 	constexpr std::uintptr_t GetPanel(std::int32_t type) noexcept
 	{
-		return memory::Call<std::uintptr_t>(this, 1, type);
+		return m::Call<std::uintptr_t>(this, 1, type);
 	}
 };

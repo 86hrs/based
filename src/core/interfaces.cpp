@@ -3,7 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-void interfaces::Setup() noexcept
+void i::Setup() noexcept
 {
 	// capture the interfaces
 	client = Capture<IBaseClientDLL>("client.dll", "VClient018");
@@ -12,7 +12,7 @@ void interfaces::Setup() noexcept
 	engineTrace = Capture<IEngineTrace>("engine.dll", "EngineTraceClient004");
 	engineVGui = Capture<IEngineVGui>("engine.dll", "VEngineVGui001");
 	globals = **reinterpret_cast<IGlobalVars***>((*reinterpret_cast<uintptr_t**>(client))[11] + 10);
-	glow = *reinterpret_cast<IGlowManager**>(memory::glowManager);
+	glow = *reinterpret_cast<IGlowManager**>(m::glowManager);
 	materialSystem = Capture<IMaterialSystem>("materialsystem.dll", "VMaterialSystem080");
 	studioRender = Capture<IStudioRender>("studiorender.dll", "VStudioRender026");
 	surface = Capture<ISurface>("vguimatsurface.dll", "VGUI_Surface031");
@@ -20,6 +20,7 @@ void interfaces::Setup() noexcept
 	engine = Capture<IVEngineClient>("engine.dll", "VEngineClient014");
 	modelInfo = Capture<IVModelInfo>("engine.dll", "VModelInfoClient004");
 	panel = Capture<IVPanel>("vgui2.dll", "VGUI_Panel009");
+	effects = Capture<IEffects>("client.dll", "IEffects");
 
 	// get the exported KeyValuesSystem function
 	if (const HINSTANCE handle = GetModuleHandle("vstdlib.dll"))
@@ -28,7 +29,7 @@ void interfaces::Setup() noexcept
 }
 
 template <typename Interface>
-Interface* interfaces::Capture(const char* moduleName, const char* interfaceName) noexcept
+Interface* i::Capture(const char* moduleName, const char* interfaceName) noexcept
 {
 	const HINSTANCE handle = GetModuleHandle(moduleName);
 

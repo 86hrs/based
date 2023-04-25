@@ -14,7 +14,7 @@ public:
 
 	constexpr void SetMaterialVarFlag(const std::int32_t flag, const bool on) noexcept
 	{
-		memory::Call<void>(this, 29, flag, on);
+		m::Call<void>(this, 29, flag, on);
 	}
 };
 
@@ -23,11 +23,11 @@ class IMaterialSystem
 public:
 	constexpr IMaterial* CreateMaterial(const char* name, CKeyValues* kv) noexcept
 	{
-		return memory::Call<IMaterial*>(this, 83, name, kv);
+		return m::Call<IMaterial*>(this, 83, name, kv);
 	}
 
 	constexpr IMaterial* FindMaterial(const char* name) noexcept
 	{
-		return memory::Call<IMaterial*>(this, 84, name, nullptr, true, nullptr);
+		return m::Call<IMaterial*>(this, 84, name, nullptr, true, nullptr);
 	}
 };

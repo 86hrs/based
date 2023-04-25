@@ -4,10 +4,10 @@
 #include <cstdint>
 #include <thread>
 
-// expose our cheat to main.cpp
+// expose cheat hooks to main.cpp
 #include "core/hooks.h"
 
-// gui
+// expose gui hooks to main.cpp 
 #include "core/gui_hooks.h"
 
 /*
@@ -17,22 +17,22 @@ msbuild /p:Platform=x86
 
 // setup our cheat & unload it when exit key is pressed
 DWORD WINAPI Setup(LPVOID lpParam) {
-  memory::Setup();      // find signatures
-  interfaces::Setup();  // capture interfaces
+  m::Setup();      // find signatures
+  i::Setup();  // capture interfaces
   netvars::Setup();     // dump latest offsets
-  hooks::Setup();       // place hooks
+  h::Setup();       // place hooks
 
   // gui setup
-  gui::Setup();
-  hooks::guiSetup();
+  gui::Setup(); // setup gui
+  h::guiSetup(); // place gui hooks
 
   // sleep our thread until unload key is pressed
   while (!GetAsyncKeyState(VK_END))
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-  hooks::guiDestroy();
   gui::Destroy();
-  hooks::Destroy();  // restore hooks
+  h::guiDestroy();
+  h::Destroy();  // restore hooks
 
   // unload library
   FreeLibraryAndExitThread(static_cast<HMODULE>(lpParam), EXIT_SUCCESS);

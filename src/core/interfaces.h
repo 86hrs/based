@@ -16,9 +16,11 @@
 #include "../valve/ivengineclient.h"
 #include "../valve/ivmodelinfo.h"
 #include "../valve/ivpanel.h"
+#include "../valve/ieffects.h"
+#include "../valve/viewsetup.h"
 
 // learn more about interfaces -> https://www.youtube.com/watch?v=C0wGdwnaArA
-namespace interfaces
+namespace i
 {
 	// call once to capture all interface pointers
 	void Setup() noexcept;
@@ -42,6 +44,7 @@ namespace interfaces
 	inline IVEngineClient* engine = nullptr;
 	inline IVModelInfo* modelInfo = nullptr;
 	inline IVPanel* panel = nullptr;
+	inline IEffects* effects = nullptr;
 
 	// other
 	inline void* keyValuesSystem = nullptr;

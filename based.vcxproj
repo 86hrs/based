@@ -88,7 +88,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -102,15 +102,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,7 +122,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -173,6 +173,8 @@
     <ClCompile Include="src\core\interfaces.cpp" />
     <ClCompile Include="src\core\netvars.cpp" />
     <ClCompile Include="src\hacks\aimbot.cpp" />
+    <ClCompile Include="src\hacks\esp.cpp" />
+    <ClCompile Include="src\hacks\glow.cpp" />
     <ClCompile Include="src\hacks\misc.cpp" />
     <ClCompile Include="src\hacks\triggerbot.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -202,6 +204,8 @@
     <ClInclude Include="src\core\interfaces.h" />
     <ClInclude Include="src\core\netvars.h" />
     <ClInclude Include="src\hacks\aimbot.h" />
+    <ClInclude Include="src\hacks\esp.h" />
+    <ClInclude Include="src\hacks\glow.h" />
     <ClInclude Include="src\hacks\misc.h" />
     <ClInclude Include="src\hacks\triggerbot.h" />
     <ClInclude Include="src\util\hash.h" />
@@ -209,6 +213,7 @@
     <ClInclude Include="src\valve\cclientclass.h" />
     <ClInclude Include="src\valve\ccolor.h" />
     <ClInclude Include="src\valve\centity.h" />
+    <ClInclude Include="src\valve\ieffects.h" />
     <ClInclude Include="src\valve\ienginevgui.h" />
     <ClInclude Include="src\valve\iglowmanager.h" />
     <ClInclude Include="src\valve\ckeyvalues.h" />
@@ -230,6 +235,7 @@
     <ClInclude Include="src\valve\istudiorender.h" />
     <ClInclude Include="src\valve\ivmodelinfo.h" />
     <ClInclude Include="src\valve\ivpanel.h" />
+    <ClInclude Include="src\valve\viewsetup.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -2,6 +2,6 @@
 
 class CUserCmd;
 
-namespace hacks {
-    bool RunTriggerBot(CUserCmd* cmd);
-}
+namespace f {
+void RunTriggerBot(CUserCmd* cmd) noexcept;
+} // namespace hacks

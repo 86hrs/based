@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <functional>
 
-namespace memory
+namespace m
 {
 	// call once to scan for all patterns
 	void Setup() noexcept;

@@ -54,21 +54,21 @@ public:
 
 	constexpr void SetColorModulation(const float* color) noexcept
 	{
-		memory::Call<void>(this, 27, color);
+		m::Call<void>(this, 27, color);
 	}
 
 	constexpr void SetAlphaModulation(const float alpha) noexcept
 	{
-		memory::Call<void>(this, 28, alpha);
+		m::Call<void>(this, 28, alpha);
 	}
 
 	constexpr void ForcedMaterialOverride(IMaterial* material, const std::int32_t type = OVERRIDE_NORMAL, const std::int32_t index = -1) noexcept
 	{
-		memory::Call<void>(this, 33, material, type, index);
+		m::Call<void>(this, 33, material, type, index);
 	}
 
 	constexpr bool IsForcedMaterialOverride() noexcept
 	{
-		return memory::Call<bool>(this, 34);
+		return m::Call<bool>(this, 34);
 	}
 };

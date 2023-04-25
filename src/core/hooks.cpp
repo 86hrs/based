@@ -6,71 +6,70 @@
 #include "../../ext/minhook/minhook.h"
 #include "../core/globals.h"
 #include "../hacks/aimbot.h"
+#include "../hacks/esp.h"
+#include "../hacks/glow.h"
 #include "../hacks/misc.h"
 #include "../hacks/triggerbot.h"
 
-static bool WorldToScreen(const CVector& point, CVector& screen) noexcept {
-  // get the w2s matrix
-  const CMatrix4x4& matrix = interfaces::engine->WorldToScreenMatrix();
-
-  // calc width first to test whether on screen or not
-  float w = matrix.data[3][0] * point.x + matrix.data[3][1] * point.y +
-            matrix.data[3][2] * point.z + matrix.data[3][3];
-
-  // not on screen
-  if (w < 0.001f) return false;
-
-  float inverse = 1.f / w;
-
-  screen.x = (matrix.data[0][0] * point.x + matrix.data[0][1] * point.y +
-              matrix.data[0][2] * point.z + matrix.data[0][3]) *
-             inverse;
-  screen.y = (matrix.data[1][0] * point.x + matrix.data[1][1] * point.y +
-              matrix.data[1][2] * point.z + matrix.data[1][3]) *
-             inverse;
-
-  int x, y;
-  interfaces::engine->GetScreenSize(x, y);
-
-  screen.x = (x * 0.5f) + (screen.x * x) * 0.5f;
-  screen.y = (y * 0.5f) - (screen.y * y) * 0.5f;
-
-  // on screen
-  return true;
+float* HealthToRGB(int health) {
+  float* rgb = new float[3];
+  if (health >= 0 && health <= 100) {
+    float ratio = (float)health / 100;
+    rgb[0] = 1 - ratio;  // red
+    rgb[1] = ratio;      // green
+    rgb[2] = 0;          // blue
+  } else {
+    rgb[0] = 0;
+    rgb[1] = 0;
+    rgb[2] = 0;
+  }
+  return rgb;
 }
 
-void hooks::Setup() noexcept {
+void h::Setup() noexcept {
   MH_Initialize();
 
+  const auto keyValuesSystem = m::Get(i::keyValuesSystem, 1);
+  const auto createMove = m::Get(i::clientMode, 24);
+  const auto doPostScreenSpaceEffects = m::Get(i::clientMode, 44);
+  const auto studioRender = m::Get(i::studioRender, 29);
+  const auto paintTraverse = m::Get(i::panel, 41);
+  const auto overrideView = m::Get(i::clientMode, 18);
+  const auto dispatchUserMSG = m::Get(i::client, 38);
   // AllocKeyValuesMemory hook
-  MH_CreateHook(memory::Get(interfaces::keyValuesSystem, 1),
-                &AllocKeyValuesMemory,
+  MH_CreateHook(keyValuesSystem, &AllocKeyValuesMemory,
                 reinterpret_cast<void**>(&AllocKeyValuesMemoryOriginal));
 
   // CreateMove hook
-  MH_CreateHook(memory::Get(interfaces::clientMode, 24), &CreateMove,
+  MH_CreateHook(createMove, &CreateMove,
                 reinterpret_cast<void**>(&CreateMoveOriginal));
 
   // DoPostScreenSpaceEffects hook
-  MH_CreateHook(
-      memory::Get(interfaces::clientMode, 44),  // function is @ index 44
-      &DoPostScreenSpaceEffects,
-      reinterpret_cast<void**>(
-          &DoPostScreenSpaceEffectsOriginal)  // og function
+  MH_CreateHook(doPostScreenSpaceEffects,  // function is @ index 44
+                &DoPostScreenSpaceEffects,
+                reinterpret_cast<void**>(
+                    &DoPostScreenSpaceEffectsOriginal)  // og function
   );
 
   // DrawModel hook
-  MH_CreateHook(memory::Get(interfaces::studioRender, 29), &DrawModel,
+  MH_CreateHook(studioRender, &DrawModel,
                 reinterpret_cast<void**>(&DrawModelOriginal));
 
   // PaintTraverse hook
-  MH_CreateHook(memory::Get(interfaces::panel, 41), &PaintTraverse,
+  MH_CreateHook(paintTraverse, &PaintTraverse,
                 reinterpret_cast<void**>(&PaintTraverseOriginal));
+  // OverideView hook
+  MH_CreateHook(overrideView, &OverrideView,
+                reinterpret_cast<void**>(&OverrideViewOriginal));
+
+  // DispatchUserMessage hook
+  MH_CreateHook(dispatchUserMSG, &DispatchUserMessage,
+                reinterpret_cast<void**>(&DispatchUserMessageOriginal));
 
   MH_EnableHook(MH_ALL_HOOKS);
 }
 
-void hooks::Destroy() noexcept {
+void h::Destroy() noexcept {
   // restore hooks
   MH_DisableHook(MH_ALL_HOOKS);
   MH_RemoveHook(MH_ALL_HOOKS);
@@ -79,38 +78,44 @@ void hooks::Destroy() noexcept {
   MH_Uninitialize();
 }
 
-void* __stdcall hooks::AllocKeyValuesMemory(const std::int32_t size) noexcept {
+void* __stdcall h::AllocKeyValuesMemory(const std::int32_t size) noexcept {
   // if function is returning to speficied addresses, return nullptr to "bypass"
   if (const std::uint32_t address =
           reinterpret_cast<std::uint32_t>(_ReturnAddress());
-      address ==
-          reinterpret_cast<std::uint32_t>(memory::allocKeyValuesEngine) ||
-      address == reinterpret_cast<std::uint32_t>(memory::allocKeyValuesClient))
+      address == reinterpret_cast<std::uint32_t>(m::allocKeyValuesEngine) ||
+      address == reinterpret_cast<std::uint32_t>(m::allocKeyValuesClient))
     return nullptr;
 
   // return original
-  return AllocKeyValuesMemoryOriginal(interfaces::keyValuesSystem, size);
+  return AllocKeyValuesMemoryOriginal(i::keyValuesSystem, size);
 }
 
-bool __stdcall hooks::CreateMove(float frameTime, CUserCmd* cmd) noexcept {
+bool __stdcall h::DispatchUserMessage(int type, uint32_t flags, int size,
+                                      const void* message) {
+  // if (g::localPlayer && i::engine->IsInGame())
+  //   if (GetAsyncKeyState(VK_TAB)) DispatchUserMessage(50, 0, 0, nullptr);
+  return DispatchUserMessageOriginal(i::client, type, flags, size, message);
+}
+
+bool __stdcall h::CreateMove(float frameTime, CUserCmd* cmd) noexcept {
   // make sure this function is being called from CInput::CreateMove
   if (!cmd->commandNumber)
-    return CreateMoveOriginal(interfaces::clientMode, frameTime, cmd);
+    return CreateMoveOriginal(i::clientMode, frameTime, cmd);
 
   // get our local player here
-  globals::UpdateLocalPlayer();
+  g::UpdateLocalPlayer();
 
   // run before aimbot becuase of silent aim problems
-  if (globals::ignoreRecoil) hacks::RecoilControl(cmd);
+  if (g::ignoreRecoil) f::RecoilControl(cmd);
 
   // this would be done anyway by returning true
-  if (CreateMoveOriginal(interfaces::clientMode, frameTime, cmd))
-    interfaces::engine->SetViewAngles(cmd->viewAngles);
+  if (CreateMoveOriginal(i::clientMode, frameTime, cmd))
+    i::engine->SetViewAngles(cmd->viewAngles);
 
-  if (globals::localPlayer && globals::localPlayer->IsAlive()) {
+  if (g::localPlayer && g::localPlayer->IsAlive()) {
     // aimbot bone
     int iAimbotBone;
-    switch (globals::guiAimbotBone) {
+    switch (g::guiAimbotBone) {
       case 0:
         // head
         iAimbotBone = 8;
@@ -135,205 +140,91 @@ bool __stdcall hooks::CreateMove(float frameTime, CUserCmd* cmd) noexcept {
         iAimbotBone = 7;
         break;
     }
-    if (globals::guiAimbot)
-      hacks::RunAimbot(cmd, iAimbotBone, globals::aimbotFov,
-                       globals::aimbotSmoothness);
+    if (g::guiAimbot)
+      f::RunAimbot(cmd, iAimbotBone, g::aimbotFov, g::aimbotSmoothness);
 
-    if (globals::guiTriggerbot) hacks::RunTriggerBot(cmd);
+    if (g::guiTriggerbot) f::RunTriggerBot(cmd);
 
-    if (globals::radar) hacks::RunRadar();
+    if (g::radar) f::RunRadar();
 
-    if (globals::guiBhop) hacks::RunBunnyHop(cmd);
+    if (g::guiBhop) f::RunBunnyHop(cmd);
 
-    if (globals::fov)
-      hacks::RunFov(globals::fovValue);
+    if (g::ignoreFlash)
+      f::IgnoreFlash(30.f);
     else
-      hacks::RunFov(90);
-
-    if (globals::ignoreFlash)
-      hacks::IgnoreFlash(30.f);
-    else
-      hacks::IgnoreFlash(255.f);
+      f::IgnoreFlash(255.f);
   }
   return false;
 }
 
-void __stdcall hooks::DoPostScreenSpaceEffects(const void* viewSetup) noexcept {
-  // make local player is valid && we are in game
-  if (globals::localPlayer && interfaces::engine->IsInGame()) {
-    for (int i = 0; i < interfaces::glow->glowObjects.size; ++i) {
-      // get the glow object
-      IGlowManager::CGlowObject& glowObject = interfaces::glow->glowObjects[i];
+void __stdcall h::OverrideView(ViewSetup* setup) {
+  if (!g::localPlayer) return OverrideViewOriginal(i::clientMode, setup);
+  if (g::localPlayer->IsScoped())
+    return OverrideViewOriginal(i::clientMode, setup);
 
-      // make sure it is used
-      if (glowObject.IsUnused()) continue;
+  if (g::fov) setup->fov = g::fovValue;
 
-      switch (glowObject.entity->GetClientClass()->classID) {
-        case CClientClass::CCSPlayer:
-          if (!glowObject.entity->IsAlive()) break;
-          // enemies
-          if (globals::guiEnemyGlow)
-            if (glowObject.entity->GetTeam() != globals::localPlayer->GetTeam())
-              glowObject.SetColor(globals::enemyGlowColor[0],
-                                  globals::enemyGlowColor[1],
-                                  globals::enemyGlowColor[2]);
-            // teammates
-            else if (globals::guiTeamGlow)
-              glowObject.SetColor(globals::teamGlowColor[0],
-                                  globals::teamGlowColor[1],
-                                  globals::teamGlowColor[2]);
-          break;
-        default:
-          break;
-      }
-    }
-  }
+  OverrideViewOriginal(i::clientMode, setup);
+}
+void __stdcall h::DoPostScreenSpaceEffects(const void* viewSetup) noexcept {
+  f::glow();
   // call og function
-  DoPostScreenSpaceEffectsOriginal(interfaces::clientMode, viewSetup);
+  DoPostScreenSpaceEffectsOriginal(i::clientMode, viewSetup);
 }
 
-void __stdcall hooks::DrawModel(void* results, const CDrawModelInfo& info,
-                                CMatrix3x4* bones, float* flexWeights,
-                                float* FlexDelayedWeights,
-                                const CVector& modelOrigin,
-                                const std::int32_t flags) noexcept {
-  if (globals::guiChams) {
+void __stdcall h::DrawModel(void* results, const CDrawModelInfo& info,
+                            CMatrix3x4* bones, float* flexWeights,
+                            float* FlexDelayedWeights,
+                            const CVector& modelOrigin,
+                            const std::int32_t flags) noexcept {
+  if (g::guiChams) {
+    // TODO move chams function to own file
     // make sure local player && renderable pointer != nullptr
     // or else *crash* :(
-    if (globals::localPlayer && info.renderable) {
+    if (g::localPlayer && info.renderable) {
       CEntity* entity = info.renderable->GetIClientUnknown()->GetBaseEntity();
 
       // make sure entity is a valid enemy player
       if (entity && entity->IsPlayer() &&
-          entity->GetTeam() != globals::localPlayer->GetTeam()) {
+          entity->GetTeam() != g::localPlayer->GetTeam()) {
         // get our material to override
         static IMaterial* material =
-            interfaces::materialSystem->FindMaterial("debug/debugambientcube");
-
-        // float arrays to hold our color
-        // put in globals to mod with menu
-        float hidden[3] = {globals::hiddenChamsColor[0],
-                           globals::hiddenChamsColor[1],
-                           globals::hiddenChamsColor[2]};
-        float visible[3] = {globals::visibleChamsColor[0],
-                            globals::visibleChamsColor[1],
-                            globals::visibleChamsColor[2]};
+            i::materialSystem->FindMaterial("debug/debugambientcube");
 
         // alpha modulate (once in my case)
-        interfaces::studioRender->SetAlphaModulation(1.f);
+        i::studioRender->SetAlphaModulation(1.f);
 
         // show through walls
         material->SetMaterialVarFlag(IMaterial::IGNOREZ, true);
-        interfaces::studioRender->SetColorModulation(hidden);
-        interfaces::studioRender->ForcedMaterialOverride(material);
-        DrawModelOriginal(interfaces::studioRender, results, info, bones,
-                          flexWeights, FlexDelayedWeights, modelOrigin, flags);
+        i::studioRender->SetColorModulation(g::hidden);
+        i::studioRender->ForcedMaterialOverride(material);
+        DrawModelOriginal(i::studioRender, results, info, bones, flexWeights,
+                          FlexDelayedWeights, modelOrigin, flags);
+
         // do not show through walls
         material->SetMaterialVarFlag(IMaterial::IGNOREZ, false);
-        interfaces::studioRender->SetColorModulation(visible);
-        interfaces::studioRender->ForcedMaterialOverride(material);
-        DrawModelOriginal(interfaces::studioRender, results, info, bones,
-                          flexWeights, FlexDelayedWeights, modelOrigin, flags);
+        if (g::bHealthBasedChams)
+          i::studioRender->SetColorModulation(HealthToRGB(entity->GetHealth()));
+        else
+          i::studioRender->SetColorModulation(g::visible);
+
+        i::studioRender->ForcedMaterialOverride(material);
+        DrawModelOriginal(i::studioRender, results, info, bones, flexWeights,
+                          FlexDelayedWeights, modelOrigin, flags);
 
         // reset material override + return from hook
-        return interfaces::studioRender->ForcedMaterialOverride(nullptr);
+        return i::studioRender->ForcedMaterialOverride(nullptr);
       }
     }
   }
   // call original DrawModel for things that aren't getting chamed
-  DrawModelOriginal(interfaces::studioRender, results, info, bones, flexWeights,
+  DrawModelOriginal(i::studioRender, results, info, bones, flexWeights,
                     FlexDelayedWeights, modelOrigin, flags);
 }
 
-void __stdcall hooks::PaintTraverse(std::uintptr_t vguiPanel, bool forceRepaint,
-                                    bool allowForce) noexcept {
-  if (globals::esp) {
-    // make sure we have the right panel
-    if (vguiPanel == interfaces::engineVGui->GetPanel(PANEL_TOOLS)) {
-      // make sure we are in-game
-      if (interfaces::engine->IsInGame() && globals::localPlayer) {
-        // loop through players
-        for (int i = 1; i <= interfaces::globals->maxClients; ++i) {
-          // get the player
-          CEntity* player = interfaces::entityList->GetEntityFromIndex(i);
-
-          // make sure player is valid
-          if (!player) continue;
-
-          // make sure they aren't dormant && are alive
-          if (player->IsDormant() || !player->IsAlive()) continue;
-
-          // no esp on teammates
-          if (player->GetTeam() == globals::localPlayer->GetTeam()) continue;
-
-          // dont do esp on who we are spectating
-          if (!globals::localPlayer->IsAlive())
-            if (globals::localPlayer->GetObserverTarget() == player) continue;
-
-          // player's bone matrix
-          CMatrix3x4 bones[128];
-          if (!player->SetupBones(bones, 128, 0x7FF00,
-                                  interfaces::globals->currentTime))
-            continue;
-
-          // screen position of head
-          // we add 11.f here because we want the box ABOVE their head
-          CVector top;
-          if (!WorldToScreen(bones[8].Origin() + CVector{0.f, 0.f, 11.f}, top))
-            continue;
-
-          // screen position of feet
-          // we subtract 9.f here because we want the box BELOW their feet
-          CVector bottom;
-          if (!WorldToScreen(player->GetAbsOrigin() - CVector{0.f, 0.f, 9.f},
-                             bottom))
-            continue;
-
-          // the height of the box is the difference between
-          // the bottom (larger number) and the top
-          const float h = bottom.y - top.y;
-
-          // we can use the height to determine a width
-          const float w = h * 0.3f;
-
-          const auto left = static_cast<int>(top.x - w);
-          const auto right = static_cast<int>(top.x + w);
-
-          // set the color to white
-          interfaces::surface->DrawSetColor(255, 255, 255, 255);
-
-          // draw the normal box
-          interfaces::surface->DrawOutlinedRect(left, top.y, right, bottom.y);
-
-          // set the color to black for outlines
-          interfaces::surface->DrawSetColor(0, 0, 0, 255);
-
-          // normal box outline
-          interfaces::surface->DrawOutlinedRect(left - 1, top.y - 1, right + 1,
-                                                bottom.y + 1);
-          interfaces::surface->DrawOutlinedRect(left + 1, top.y + 1, right - 1,
-                                                bottom.y - 1);
-
-          // health bar outline (use the black color here)
-          interfaces::surface->DrawOutlinedRect(left - 6, top.y - 1, left - 3,
-                                                bottom.y + 1);
-
-          // health is an integer from 0 to 100
-          // we can make it a percentage by multipying
-          // it by 0.01
-          const float healthFrac = player->GetHealth() * 0.01f;
-
-          // set the color of the health bar to a split between red / green
-          interfaces::surface->DrawSetColor((1.f - healthFrac) * 255,
-                                            255 * healthFrac, 0, 255);
-
-          // draw it
-          interfaces::surface->DrawFilledRect(
-              left - 5, bottom.y - (h * healthFrac), left - 4, bottom.y);
-        }
-      }
-    }
-  }
+void __stdcall h::PaintTraverse(std::uintptr_t vguiPanel, bool forceRepaint,
+                                bool allowForce) noexcept {
+  if (g::esp) f::esp(vguiPanel, forceRepaint, allowForce);
   // call original function
-  PaintTraverseOriginal(interfaces::panel, vguiPanel, forceRepaint, allowForce);
+  PaintTraverseOriginal(i::panel, vguiPanel, forceRepaint, allowForce);
 }

@@ -9,14 +9,14 @@ class CEntity;
 class IClientUnknown {
  public:
   constexpr CEntity* GetBaseEntity() noexcept {
-    return memory::Call<CEntity*>(this, 7);
+    return m::Call<CEntity*>(this, 7);
   }
 };
 
 class IClientRenderable {
  public:
   constexpr IClientUnknown* GetIClientUnknown() noexcept {
-    return memory::Call<IClientUnknown*>(this, 0);
+    return m::Call<IClientUnknown*>(this, 0);
   }
 };
 
@@ -90,63 +90,63 @@ class CEntity {
 
  public:  // renderable virtual functions (+0x4)
   constexpr CModel* GetModel() noexcept {
-    return memory::Call<CModel*>(this + 0x4, 8);
+    return m::Call<CModel*>(this + 0x4, 8);
   }
 
   constexpr bool SetupBones(CMatrix3x4* out, std::int32_t max,
                             std::int32_t mask, float currentTime) noexcept {
-    return memory::Call<bool>(this + 0x4, 13, out, max, mask, currentTime);
+    return m::Call<bool>(this + 0x4, 13, out, max, mask, currentTime);
   }
 
  public:  // networkable virtual functions (+0x8)
   constexpr CClientClass* GetClientClass() noexcept {
-    return memory::Call<CClientClass*>(this + 0x8, 2);
+    return m::Call<CClientClass*>(this + 0x8, 2);
   }
 
   constexpr bool IsDormant() noexcept {
-    return memory::Call<bool>(this + 0x8, 9);
+    return m::Call<bool>(this + 0x8, 9);
   }
 
   constexpr std::int32_t GetIndex() noexcept {
-    return memory::Call<std::int32_t>(this + 0x8, 10);
+    return m::Call<std::int32_t>(this + 0x8, 10);
   }
 
  public:  // entity virtual functions
   constexpr const CVector& GetAbsOrigin() noexcept {
-    return memory::Call<const CVector&>(this, 10);
+    return m::Call<const CVector&>(this, 10);
   }
 
   constexpr std::int32_t GetTeam() noexcept {
-    return memory::Call<std::int32_t>(this, 88);
+    return m::Call<std::int32_t>(this, 88);
   }
 
   constexpr std::int32_t GetHealth() noexcept {
-    return memory::Call<std::int32_t>(this, 122);
+    return m::Call<std::int32_t>(this, 122);
   }
 
-  constexpr bool IsAlive() noexcept { return memory::Call<bool>(this, 156); }
+  constexpr bool IsAlive() noexcept { return m::Call<bool>(this, 156); }
 
-  constexpr bool IsPlayer() noexcept { return memory::Call<bool>(this, 158); }
+  constexpr bool IsPlayer() noexcept { return m::Call<bool>(this, 158); }
 
-  constexpr bool IsWeapon() noexcept { return memory::Call<bool>(this, 166); }
+  constexpr bool IsWeapon() noexcept { return m::Call<bool>(this, 166); }
 
   constexpr CEntity* GetActiveWeapon() noexcept {
-    return memory::Call<CEntity*>(this, 268);
+    return m::Call<CEntity*>(this, 268);
   }
 
   constexpr void GetEyePosition(CVector& eyePosition) noexcept {
-    memory::Call<void>(this, 285, std::ref(eyePosition));
+    m::Call<void>(this, 285, std::ref(eyePosition));
   }
 
   constexpr CEntity* GetObserverTarget() noexcept {
-    return memory::Call<CEntity*>(this, 295);
+    return m::Call<CEntity*>(this, 295);
   }
 
   constexpr void GetAimPunch(CVector& aimPunch) noexcept {
-    memory::Call<void>(this, 346, std::ref(aimPunch));
+    m::Call<void>(this, 346, std::ref(aimPunch));
   }
 
   constexpr int GetWeaponType() noexcept {
-    return memory::Call<int>(this, 455);
+    return m::Call<int>(this, 455);
   }
 };

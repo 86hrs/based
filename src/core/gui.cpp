@@ -255,51 +255,53 @@ void gui::Render() noexcept {
     switch (current_tab) {
       case 0:
         // aimbot
-        ImGui::Checkbox("triggerbot", &globals::guiTriggerbot);
-        ImGui::Checkbox("aimbot", &globals::guiAimbot);
-        ImGui::SliderInt("aimbot fov", &globals::aimbotFov, 1, 30);
-        ImGui::SliderInt("smoothness", &globals::aimbotSmoothness, 1, 20);
-        ImGui::Combo("aimbot bone", &globals::guiAimbotBone, items,
+        ImGui::Checkbox("triggerbot", &g::guiTriggerbot);
+        ImGui::Checkbox("aimbot", &g::guiAimbot);
+        ImGui::SliderInt("aimbot fov", &g::aimbotFov, 1, 30);
+        ImGui::SliderInt("smoothness", &g::aimbotSmoothness, 1, 20);
+        ImGui::Combo("aimbot bone", &g::guiAimbotBone, items,
                      IM_ARRAYSIZE(items), 5);
         break;
 
       case 1:
         // visuals
-        ImGui::Checkbox("team glow", &globals::guiTeamGlow);
+        ImGui::Checkbox("team glow", &g::guiTeamGlow);
         ImGui::SameLine();
         ImGui::ColorEdit3(
-            "team glow color", globals::teamGlowColor,
+            "team glow color", g::teamGlowColor,
             ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
-        ImGui::Checkbox("enemy glow", &globals::guiEnemyGlow);
+        ImGui::Checkbox("enemy glow", &g::guiEnemyGlow);
         ImGui::SameLine();
         ImGui::ColorEdit3(
-            "enemy glow color", globals::enemyGlowColor,
+            "enemy glow color", g::enemyGlowColor,
             ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 
-        ImGui::Checkbox("chams", &globals::guiChams);
+        ImGui::Checkbox("chams", &g::guiChams);
+
         ImGui::SameLine();
         ImGui::ColorEdit3(
-            "visible color", globals::visibleChamsColor,
+            "visible color", g::visible,
             ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
         ImGui::SameLine();
         ImGui::ColorEdit3(
-            "hidden color", globals::hiddenChamsColor,
+            "hidden color", g::hidden,
             ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
+        ImGui::Checkbox("flow", &g::bHealthBasedChams);
 
-        ImGui::Checkbox("esp", &globals::esp);
+        ImGui::Checkbox("esp", &g::esp);
 
-        ImGui::Checkbox("fov", &globals::fov);
+        ImGui::Checkbox("fov", &g::fov);
         ImGui::SameLine();
-        ImGui::SliderInt(" ", &globals::fovValue, 60, 120);
+        ImGui::SliderInt(" ", &g::fovValue, 60, 120);
         break;
 
       case 2:
         // misc
-        ImGui::Checkbox("bhop", &globals::guiBhop);
-        ImGui::Checkbox("radar", &globals::radar);
-        ImGui::Checkbox("recoil control", &globals::ignoreRecoil);
-        ImGui::Checkbox("ignore flash", &globals::ignoreFlash);
+        ImGui::Checkbox("bhop", &g::guiBhop);
+        ImGui::Checkbox("radar", &g::radar);
+        ImGui::Checkbox("recoil control", &g::ignoreRecoil);
+        ImGui::Checkbox("ignore flash", &g::ignoreFlash);
         break;
     }
 

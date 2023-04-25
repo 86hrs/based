@@ -4,7 +4,7 @@
 #include <Windows.h>
 #include <vector>
 
-void memory::Setup() noexcept
+void m::Setup() noexcept
 {
 	allocKeyValuesClient = PatternScan("client.dll", "FF 52 04 85 C0 74 0C 56") + 3;
 	allocKeyValuesEngine = PatternScan("engine.dll", "FF 52 04 85 C0 74 0C 56") + 3;
@@ -15,7 +15,7 @@ void memory::Setup() noexcept
     glowManager = PatternScan("client.dll", "0F 11 05 ? ? ? ? 83 C8 01") + 3;
 }
 
-std::uint8_t* memory::PatternScan(const char* moduleName, const char* pattern) noexcept
+std::uint8_t* m::PatternScan(const char* moduleName, const char* pattern) noexcept
 {
     static auto patternToByte = [](const char* pattern) noexcept -> const std::vector<std::int32_t>
     {

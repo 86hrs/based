@@ -2,7 +2,7 @@
 #include <cstdint>
 
 class CEntity;
-namespace globals {
+namespace g {
 inline CEntity* localPlayer = nullptr;
 
 // update the local player pointer
@@ -18,8 +18,9 @@ inline float enemyGlowColor[3] = {1.f, 0.f, 0.f};
 inline bool esp = false;
 
 inline bool guiChams = false;
-inline float visibleChamsColor[3] = {1.f, 1.f, 0.f};
-inline float hiddenChamsColor[3] = {0.f, 1.f, 1.f};
+inline bool bHealthBasedChams = false;
+inline float visible[3] = {1.f, 1.f, 0.f};
+inline float hidden[3] = {0.f, 1.f, 1.f};
 
 inline bool guiAimbot = false;
 inline int guiAimbotBone = 0;

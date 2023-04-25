@@ -186,6 +186,6 @@ class IEngineTrace
 public:
 	constexpr void TraceRay(const CRay& ray, std::uint32_t mask, const CTraceFilter& filter, CTrace& trace) noexcept
 	{
-		memory::Call<void>(this, 5, std::cref(ray), mask, std::cref(filter), std::ref(trace));
+		m::Call<void>(this, 5, std::cref(ray), mask, std::cref(filter), std::ref(trace));
 	}
 };

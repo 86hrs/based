@@ -7,7 +7,7 @@ public:
 	static CKeyValues* FromString(const char* name, const char* value) noexcept
 	{
 		static std::uintptr_t functionAddress =
-			memory::RelativeToAbsolute(reinterpret_cast<std::uintptr_t>(memory::keyValuesFromString));
+			m::RelativeToAbsolute(reinterpret_cast<std::uintptr_t>(m::keyValuesFromString));
 
 		CKeyValues* kv;
 

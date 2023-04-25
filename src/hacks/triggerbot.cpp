@@ -3,19 +3,19 @@
 #include "../core/globals.h"
 #include "../core/interfaces.h"
 
-bool hacks::RunTriggerBot(CUserCmd* cmd) {
+void f::RunTriggerBot(CUserCmd* cmd) noexcept {
   // get local player
-  globals::localPlayer = interfaces::entityList->GetEntityFromIndex(
-      interfaces::engine->GetLocalPlayerIndex());
+  g::localPlayer =
+      i::entityList->GetEntityFromIndex(i::engine->GetLocalPlayerIndex());
 
   // make sure local player is alive
-  if (!globals::localPlayer || !globals::localPlayer->IsAlive()) return false;
+  if (!g::localPlayer || !g::localPlayer->IsAlive()) return;
 
   CVector eyePosition;
-  globals::localPlayer->GetEyePosition(eyePosition);
+  g::localPlayer->GetEyePosition(eyePosition);
 
   CVector aimPunch;
-  globals::localPlayer->GetAimPunch(aimPunch);
+  g::localPlayer->GetAimPunch(aimPunch);
 
   // calculate the destination of the ray
   const CVector dst =
@@ -24,16 +24,16 @@ bool hacks::RunTriggerBot(CUserCmd* cmd) {
 
   // trace the ray from eyes -> dest
   CTrace trace;
-  interfaces::engineTrace->TraceRay({eyePosition, dst}, 0x46004009,
-                                    globals::localPlayer, trace);
+  i::engineTrace->TraceRay({eyePosition, dst}, 0x46004009, g::localPlayer,
+                           trace);
 
   // make sure we hit a player
-  if (!trace.entity || !trace.entity->IsPlayer()) return false;
+  if (!trace.entity || !trace.entity->IsPlayer()) return;
 
   // make sure player is alive & is an enemy
   if (!trace.entity->IsAlive() ||
-      trace.entity->GetTeam() == globals::localPlayer->GetTeam())
-    return false;
+      trace.entity->GetTeam() == g::localPlayer->GetTeam())
+    return;
 
   // make our local player shoot
   cmd->buttons |= CUserCmd::IN_ATTACK;

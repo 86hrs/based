@@ -143,11 +143,11 @@ public:
 
 	constexpr const char* GetModelName(const CModel* model) noexcept
 	{
-		return memory::Call<const char*>(this, 3, model);
+		return m::Call<const char*>(this, 3, model);
 	}
 
 	constexpr CStudioHdr* GetStudioModel(const CModel* model) noexcept
 	{
-		return memory::Call<CStudioHdr*>(this, 32, model);
+		return m::Call<CStudioHdr*>(this, 32, model);
 	}
 };

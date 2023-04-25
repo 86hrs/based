@@ -1,7 +1,7 @@
 #pragma once
 #include "interfaces.h"
 
-namespace hooks {
+namespace h {
 // call once to emplace all hooks
 void Setup() noexcept;
 
@@ -44,5 +44,15 @@ using PaintTraverseFn = void(__thiscall*)(IVPanel*, std::uintptr_t, bool,
 inline PaintTraverseFn PaintTraverseOriginal = nullptr;
 void __stdcall PaintTraverse(std::uintptr_t vguiPanel, bool forceRepaint,
                              bool allowForce) noexcept;
+
+// OvverrideView Hook
+using OverrideViewFn = void(__thiscall*)(void*, ViewSetup*);
+inline OverrideViewFn OverrideViewOriginal = nullptr;
+void __stdcall OverrideView(ViewSetup* setup);
+
+// DispatchUserMessage Hook
+using DispatchUserMessageFn = int(__thiscall*)(void*, int, uint32_t, int, const void*);
+inline DispatchUserMessageFn DispatchUserMessageOriginal = nullptr;
+bool __stdcall DispatchUserMessage(int type, uint32_t flags, int size, const void* message);
 
 }  // namespace hooks

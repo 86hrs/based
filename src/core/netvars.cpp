@@ -6,7 +6,7 @@
 void netvars::Setup() noexcept
 {
 	// loop through linked-list and recursicely dump
-	for (CClientClass* client = interfaces::client->GetAllClasses(); client; client = client->next)
+	for (CClientClass* client = i::client->GetAllClasses(); client; client = client->next)
 		if (CRecvTable* table = client->table)
 			Dump(client->networkName, table, 0);
 }

@@ -1,7 +1,7 @@
 #pragma once
 #include "gui.h"
 
-namespace hooks {
+namespace h {
 void guiSetup();
 void guiDestroy() noexcept;
 
